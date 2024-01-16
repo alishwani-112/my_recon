@@ -84,3 +84,17 @@
                       cat allurl | gf ssrf | tee -a gfPatternsScan/ssfrparamsGf.txt
                       cat allurl | Gxss | tee -a gfPatternsScan/refelected.txt
 
+4-js file 
+	-auto myjs
+	-manual
+	    auto all
+	    i- get all js from tarket
+	            echo tarcket | subjs |tee js1
+	            echo tarcket | hakrawler| awk -F ']' '{print $2}'|grep -iE '\.js'|grep -ivE '\.json'|tee js2
+	            cat js1 js2 |sort -u | tee js
+	            linx
+	            GoLinkFinder
+	    ii- endpoint and dir
+	            for i in `cat js` ;do  echo "[ + ] URL: " $i  && python  linkfinder.py -i $i  -o cli; done
+	    iii- secrit and tooken
+	            for i in `cat js ` ; do echo "[ + ] URL: " $i  && python3 SecretFinder.py -i $i -o cli ; done
