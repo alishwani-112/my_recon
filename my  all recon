@@ -1,0 +1,86 @@
+#all_recon 
+1-get roots
+    0-note 
+	1-Acquisitions
+		https://www.crunchbase.com/	
+	2-get asn && cidr 
+		  amass intel -org tesla
+      https://bgp.he.net/
+      echo x.com|asnmap |tee asn
+    3-enum asn  
+        -auto 
+            asn_host.sh (my tool)
+        -manual 
+          echo asn|asnmap|tee cidr_from_asn
+          for i in `cat cidr`; do prips $i >>allip; done
+          cat alip | hakrevdns		
+          cat allip|hakip2host
+        -send asn to port scan by
+            echo asn |asnmap|naabu -nmap-cli 'nmap -sV'
+        -amass intel -asn
+	4-by zone transfer 
+        dnsrecon -d example.com -r 192.168.1.0/24 -r 10.0.0.0/24
+    5-crt.sh
+      -auto 
+          myautoscript(crt_scan.sh)
+      -manual
+        curl -s https://crt.sh/\?q=ibm\&output\=json >1
+        cat 1 | jq ".[].common_name,.[].name_value"| cut -d'"' -f2 | sed 's/\\n/\n/g' | sed 's/\*.//g'| sed -r 's/([A-Za-z0-9._%+-]+@[A-Za-z0-9.-]+\.[A-Za-z]{2,4})//g' |sort | uniq |rev |cut -d "." -f 1,2 |rev| sort -u|grep ib
+
+2-subdomain 
+  -my auto subdomain script 
+3-network 
+  -my auto ip.sh
+  -manual 
+      -resolve ip 
+              cat seeds | xargs -n1 host | grep "has address" | cut -d" " -f4 | sort -u > ips.txt
+               or my script resolveip.sh
+      -see what is server of ip 
+              cat ip |httpx -server
+       -port scan 
+              naabu -p 0-65535 -host
+              naabu -l tarket.txt -tp full  -ec -rate 200 -sa -Pn
+              nmap -Pn -A -v  --max-rate 200 --top-ports 1000   
+        - service scan
+                  nmap -sV ip -oX tarket
+         - cve scan
+                  namp scrips
+          - dns zone transfer
+                  online
+                      https://hackertarget.com/zone-transfer/
+                  manual
+                      host -t ns zonetransfer.me
+                          >>ns
+                      host -l zonetransfer.me ns
+                          >>nsztm1.digi.ninja
+                      dig axfr @ns zonetransfer.me
+                      use nslookup
+                  auto
+                      dnsrecon -d zonetransfer.me -t axfr 
+3- all url 
+      -auto myscript
+          allurl.sh
+      -manual 
+        get all url
+                      gau $domain | tee u0
+                      spider 
+                          katana -u -kf robotstxt,sitemapxml |tee u1
+                      archive
+                          waybackurls |httpx| tee u2
+                      fuzz
+                          dirsearch 
+                      url from js
+                      cat u0 u1 u2 |sort -u |tee allurl
+          -parameter 
+                  gf
+                      mkdir gfPatternsScan
+                      cat allurl | waybackurls | sort -u >> waybackdata 
+                      cat allurl | gf redirect | tee -a gfPatternsScan/redirectGf.txt
+                      cat allurl | gf xss | tee -a gfPatternsScan/xssGf.txt
+                      cat allurl | gf ssti | tee -a gfPatternsScan/sstiGf.txt
+                      cat allurl | gf sqli | tee -a gfPatternsScan/sqliGf.txt
+                      cat allurl | gf rce | tee -a gfPatternsScan/rceGf.txt
+                      cat allurl | gf lfi | tee -a gfPatternsScan/lfiGf.txt
+                      cat allurl | gf ssrf | tee -a gfPatternsScan/ssfrparamsGf.txt
+                      cat allurl | Gxss | tee -a gfPatternsScan/refelected.txt
+
